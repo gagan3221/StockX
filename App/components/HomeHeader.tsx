@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 export default function HomeHeader() {
   return (
     <View style={styles.headerContainer}>
-      <Image source={require('../App/Assets/stockxlogo.png')} style={styles.logo} />
+      <Image source={require('../Assets/stockxlogo.png')} style={styles.logo} />
       <View style={styles.searchBar}>
         <Icon name="search" size={20} color="#888" style={{ marginLeft: 8 }} />
         <TextInput
@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   logo: {
-    width: 40,
-    height: 40,
+    width: 80,
+    height: 80,
     resizeMode: 'contain',
   },
   searchBar: {
