@@ -13,9 +13,9 @@ import { View, StyleSheet } from 'react-native';
 export default function App() {
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
+    <View style={styles.container}>
         <Navigation />
-      </View>
+    </View>
     </SafeAreaProvider>
   );
 }
