@@ -3,17 +3,17 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from '
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const mockStocks = [
-  { id: '1', name: 'AAPL', price: '$150.25', change: '+2.5%' },
-  { id: '2', name: 'GOOGL', price: '$2800.50', change: '+1.8%' },
-  { id: '3', name: 'TSLA', price: '$700.00', change: '-1.2%' },
-  { id: '4', name: 'AMZN', price: '$3400.75', change: '+0.9%' },
+  { id: '1', name: 'AAPL', price: '$150.25', change: '+2.5%', fullName: 'Apple Inc.' },
+  { id: '2', name: 'GOOGL', price: '$2800.50', change: '+1.8%', fullName: 'Alphabet Inc.' },
+  { id: '3', name: 'TSLA', price: '$700.00', change: '-1.2%', fullName: 'Tesla Inc.' },
+  { id: '4', name: 'AMZN', price: '$3400.75', change: '+0.9%', fullName: 'Amazon.com Inc.' },
 ];
 
-function StockCard({ name, price, change }: { name: string; price: string; change: string }) {
+function StockCard({ name, price, change, fullName, onPress }: { name: string; price: string; change: string; fullName: string; onPress: () => void }) {
   const isPositive = change.startsWith('+');
   
   return (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.avatar} />
       <Text style={styles.stockName}>{name}</Text>
       <Text style={styles.stockPrice}>{price}</Text>
@@ -24,7 +24,7 @@ function StockCard({ name, price, change }: { name: string; price: string; chang
   );
 }
 
-function Section({ title, onViewAll, data }: { title: string; onViewAll: () => void; data: any[] }) {
+function Section({ title, onViewAll, data, navigation }: { title: string; onViewAll: () => void; data: any[]; navigation: any }) {
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
@@ -37,7 +37,15 @@ function Section({ title, onViewAll, data }: { title: string; onViewAll: () => v
         data={data}
         numColumns={2}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => <StockCard name={item.name} price={item.price} change={item.change} />}
+        renderItem={({ item }) => (
+          <StockCard 
+            name={item.name} 
+            price={item.price} 
+            change={item.change} 
+            fullName={item.fullName}
+            onPress={() => navigation.navigate('StockDetails', { stock: item })}
+          />
+        )}
         columnWrapperStyle={styles.cardRow}
         scrollEnabled={false}
       />
@@ -57,16 +65,19 @@ export default function HomeScreen({ navigation }: any) {
           title="Top Gainers"
           onViewAll={() => navigation.navigate('TopGainersLosers', { type: 'gainers' })}
           data={mockStocks}
+          navigation={navigation}
         />
         <Section
           title="Top Losers"
           onViewAll={() => navigation.navigate('TopGainersLosers', { type: 'losers' })}
           data={mockStocks}
+          navigation={navigation}
         />
         <Section
           title="Most Active"
           onViewAll={() => navigation.navigate('TopGainersLosers', { type: 'active' })}
           data={mockStocks}
+          navigation={navigation}
         />
       </ScrollView>
       
