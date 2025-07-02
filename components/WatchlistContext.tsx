@@ -1,12 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-interface Stock {
-  id: string;
-  name: string;
-  price: string;
-  change: string;
-  fullName: string;
-}
+import { Stock } from '../services/AlphaVantageAPI';
 
 interface Watchlist {
   id: string;

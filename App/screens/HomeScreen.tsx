@@ -1,13 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-
-const mockStocks = [
-  { id: '1', name: 'AAPL', price: '$150.25', change: '+2.5%', fullName: 'Apple Inc.' },
-  { id: '2', name: 'GOOGL', price: '$2800.50', change: '+1.8%', fullName: 'Alphabet Inc.' },
-  { id: '3', name: 'TSLA', price: '$700.00', change: '-1.2%', fullName: 'Tesla Inc.' },
-  { id: '4', name: 'AMZN', price: '$3400.75', change: '+0.9%', fullName: 'Amazon.com Inc.' },
-];
+import { alphaVantageAPI, Stock } from '../../services/AlphaVantageAPI';
 
 function StockCard({ name, price, change, fullName, onPress }: { name: string; price: string; change: string; fullName: string; onPress: () => void }) {
   const isPositive = change.startsWith('+');
@@ -24,7 +18,24 @@ function StockCard({ name, price, change, fullName, onPress }: { name: string; p
   );
 }
 
-function Section({ title, onViewAll, data, navigation }: { title: string; onViewAll: () => void; data: any[]; navigation: any }) {
+function Section({ title, onViewAll, data, navigation, loading }: { title: string; onViewAll: () => void; data: Stock[]; navigation: any; loading: boolean }) {
+  if (loading) {
+    return (
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{title}</Text>
+          <TouchableOpacity onPress={onViewAll}>
+            <Text style={styles.viewAll}>View All</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>Loading stocks...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
@@ -34,15 +45,15 @@ function Section({ title, onViewAll, data, navigation }: { title: string; onView
         </TouchableOpacity>
       </View>
       <FlatList
-        data={data}
+        data={data.slice(0, 4)} // Show only first 4 items on home screen
         numColumns={2}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <StockCard 
-            name={item.name} 
+            name={item.symbol} 
             price={item.price} 
-            change={item.change} 
-            fullName={item.fullName}
+            change={item.changePercent} 
+            fullName={item.name}
             onPress={() => navigation.navigate('StockDetails', { stock: item })}
           />
         )}
@@ -54,30 +65,108 @@ function Section({ title, onViewAll, data, navigation }: { title: string; onView
 }
 
 export default function HomeScreen({ navigation }: any) {
+  const [topGainers, setTopGainers] = useState<Stock[]>([]);
+  const [topLosers, setTopLosers] = useState<Stock[]>([]);
+  const [mostActive, setMostActive] = useState<Stock[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchStockData();
+  }, []);
+
+  const fetchStockData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Fetch all data in parallel
+      const [gainersData, losersData, activeData] = await Promise.all([
+        alphaVantageAPI.getTopGainers(),
+        alphaVantageAPI.getTopLosers(),
+        alphaVantageAPI.getMostActive(),
+      ]);
+
+      setTopGainers(gainersData);
+      setTopLosers(losersData);
+      setMostActive(activeData);
+    } catch (err) {
+      console.error('Error fetching stock data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch stock data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchStockData();
+  };
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Icon name="warning-outline" size={48} color="#F44336" />
+          <Text style={styles.errorTitle}>Unable to Load Data</Text>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.bottomNav}>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
+            <Icon name="home" size={24} color="#fff" />
+            <Text style={styles.navText}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Search')}>
+            <Icon name="search" size={24} color="#aaa" />
+            <Text style={[styles.navText, { color: '#aaa' }]}>Search</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Watchlist')}>
+            <Icon name="star-outline" size={24} color="#aaa" />
+            <Text style={[styles.navText, { color: '#aaa' }]}>Watchlist</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={handleRefresh}
+            colors={['#4CAF50']}
+            tintColor="#4CAF50"
+          />
+        }
       >
         <Section
           title="Top Gainers"
-          onViewAll={() => navigation.navigate('TopGainersLosers', { type: 'gainers' })}
-          data={mockStocks}
+          onViewAll={() => navigation.navigate('TopGainersLosers', { type: 'gainers', data: topGainers })}
+          data={topGainers}
           navigation={navigation}
+          loading={loading}
         />
         <Section
           title="Top Losers"
-          onViewAll={() => navigation.navigate('TopGainersLosers', { type: 'losers' })}
-          data={mockStocks}
+          onViewAll={() => navigation.navigate('TopGainersLosers', { type: 'losers', data: topLosers })}
+          data={topLosers}
           navigation={navigation}
+          loading={loading}
         />
         <Section
           title="Most Active"
-          onViewAll={() => navigation.navigate('TopGainersLosers', { type: 'active' })}
-          data={mockStocks}
+          onViewAll={() => navigation.navigate('TopGainersLosers', { type: 'active', data: mostActive })}
+          data={mostActive}
           navigation={navigation}
+          loading={loading}
         />
       </ScrollView>
       
@@ -86,13 +175,13 @@ export default function HomeScreen({ navigation }: any) {
           <Icon name="home" size={24} color="#fff" />
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Search')}>
+          <Icon name="search" size={24} color="#aaa" />
+          <Text style={[styles.navText, { color: '#aaa' }]}>Search</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Watchlist')}>
           <Icon name="star-outline" size={24} color="#aaa" />
           <Text style={[styles.navText, { color: '#aaa' }]}>Watchlist</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('StockDetails')}>
-          <Icon name="trending-up" size={24} color="#aaa" />
-          <Text style={[styles.navText, { color: '#aaa' }]}>Details</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -167,6 +256,46 @@ const styles = StyleSheet.create({
   stockChange: {
     fontSize: 12,
     fontWeight: '500',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    color: '#aaa',
+    marginTop: 12,
+    fontSize: 14,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  errorTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  errorText: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  retryButton: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   bottomNav: {
     flexDirection: 'row',

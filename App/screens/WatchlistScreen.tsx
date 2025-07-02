@@ -4,16 +4,16 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useWatchlist } from '../../components/WatchlistContext';
 
 interface StockCardProps {
+  symbol: string;
   name: string;
   price: string;
-  change: string;
-  fullName: string;
+  changePercent: string;
   onPress: () => void;
   onRemove: () => void;
 }
 
-function WatchlistStockCard({ name, price, change, fullName, onPress, onRemove }: StockCardProps) {
-  const isPositive = change.startsWith('+');
+function WatchlistStockCard({ symbol, name, price, changePercent, onPress, onRemove }: StockCardProps) {
+  const isPositive = changePercent.startsWith('+');
   
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
@@ -25,18 +25,18 @@ function WatchlistStockCard({ name, price, change, fullName, onPress, onRemove }
       {/* Stock avatar */}
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>
-          {name === 'AAPL' ? '🍎' : 
-           name === 'GOOGL' ? '🔍' : 
-           name === 'TSLA' ? '🚗' : 
-           name === 'AMZN' ? '📦' : '📈'}
+          {symbol === 'AAPL' ? '🍎' : 
+           symbol === 'GOOGL' ? '🔍' : 
+           symbol === 'TSLA' ? '🚗' : 
+           symbol === 'AMZN' ? '📦' : '📈'}
         </Text>
       </View>
       
       {/* Stock info */}
-      <Text style={styles.stockName}>{name}</Text>
+      <Text style={styles.stockName}>{symbol}</Text>
       <Text style={styles.stockPrice}>{price}</Text>
       <Text style={[styles.stockChange, { color: isPositive ? '#4CAF50' : '#F44336' }]}>
-        {change}
+        {changePercent}
       </Text>
     </TouchableOpacity>
   );
@@ -117,10 +117,10 @@ export default function WatchlistScreen({ navigation }: any) {
 
   const renderStockCard = ({ item }: { item: any }) => (
     <WatchlistStockCard
+      symbol={item.symbol}
       name={item.name}
       price={item.price}
-      change={item.change}
-      fullName={item.fullName}
+      changePercent={item.changePercent}
       onPress={() => handleStockPress(item)}
       onRemove={() => handleRemoveStock(item.id)}
     />
