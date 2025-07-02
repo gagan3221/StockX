@@ -51,8 +51,13 @@ export default function SearchScreen({ navigation }: any) {
     try {
       setLoading(true);
       setError(null);
+      
+      console.log(`Searching for "${query.trim()}"... (using cache if available)`);
+      
       const results = await alphaVantageAPI.searchSymbol(query.trim());
       setSearchResults(results);
+      
+      console.log(`✅ Search completed for "${query.trim()}" - found ${results.length} results`);
     } catch (err) {
       console.error('Error searching stocks:', err);
       setError(err instanceof Error ? err.message : 'Failed to search stocks');

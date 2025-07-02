@@ -1,4 +1,5 @@
 import { ALPHA_VANTAGE_API_KEY } from '../config/api';
+import { cacheService } from './cacheService';
 
 const API_KEY = ALPHA_VANTAGE_API_KEY;
 const BASE_URL = 'https://www.alphavantage.co/query';
@@ -105,7 +106,18 @@ class AlphaVantageAPI {
   }
 
   // Fetch Top Gainers and Losers
-  async getTopGainersLosers(): Promise<TopGainersLosersResponse> {
+  async getTopGainersLosers(useCache: boolean = true): Promise<TopGainersLosersResponse> {
+    const cacheKey = 'top_gainers_losers';
+    const cacheExpiryMs = 5 * 60 * 1000; // 5 minutes
+    
+    // Try to get from cache first
+    if (useCache) {
+      const cachedData = await cacheService.get<TopGainersLosersResponse>(cacheKey);
+      if (cachedData) {
+        return cachedData;
+      }
+    }
+    
     try {
       const response = await fetch(
         `${this.baseUrl}?function=TOP_GAINERS_LOSERS&apikey=${this.apiKey}`
@@ -125,6 +137,15 @@ class AlphaVantageAPI {
         throw new Error('API call frequency limit reached. Please try again later.');
       }
       
+      if (data['Information']) {
+        throw new Error('Daily API limit reached. You have used all 25 free requests for today. Please try again tomorrow or upgrade your plan.');
+      }
+      
+      // Cache the successful response
+      if (data.top_gainers && data.top_losers && data.most_actively_traded) {
+        await cacheService.set(cacheKey, data, cacheExpiryMs);
+      }
+      
       return data;
     } catch (error) {
       console.error('Error fetching top gainers/losers:', error);
@@ -133,7 +154,18 @@ class AlphaVantageAPI {
   }
 
   // Get Company Overview
-  async getCompanyOverview(symbol: string): Promise<CompanyOverview> {
+  async getCompanyOverview(symbol: string, useCache: boolean = true): Promise<CompanyOverview> {
+    const cacheKey = `company_overview_${symbol}`;
+    const cacheExpiryMs = 10 * 60 * 1000; // 10 minutes (company data changes less frequently)
+    
+    // Try to get from cache first
+    if (useCache) {
+      const cachedData = await cacheService.get<CompanyOverview>(cacheKey);
+      if (cachedData) {
+        return cachedData;
+      }
+    }
+    
     try {
       const response = await fetch(
         `${this.baseUrl}?function=OVERVIEW&symbol=${symbol}&apikey=${this.apiKey}`
@@ -153,6 +185,15 @@ class AlphaVantageAPI {
         throw new Error('API call frequency limit reached. Please try again later.');
       }
       
+      if (data['Information']) {
+        throw new Error('Daily API limit reached. You have used all 25 free requests for today. Please try again tomorrow or upgrade your plan.');
+      }
+      
+      // Cache the successful response
+      if (data.Symbol && data.Name) {
+        await cacheService.set(cacheKey, data, cacheExpiryMs);
+      }
+      
       return data;
     } catch (error) {
       console.error('Error fetching company overview:', error);
@@ -161,7 +202,18 @@ class AlphaVantageAPI {
   }
 
   // Search for stocks by keyword
-  async searchSymbol(keywords: string): Promise<SearchResult[]> {
+  async searchSymbol(keywords: string, useCache: boolean = true): Promise<SearchResult[]> {
+    const cacheKey = `symbol_search_${keywords.toLowerCase().replace(/\s+/g, '_')}`;
+    const cacheExpiryMs = 15 * 60 * 1000; // 15 minutes (search results don't change frequently)
+    
+    // Try to get from cache first
+    if (useCache) {
+      const cachedData = await cacheService.get<SearchResult[]>(cacheKey);
+      if (cachedData) {
+        return cachedData;
+      }
+    }
+    
     try {
       const response = await fetch(
         `${this.baseUrl}?function=SYMBOL_SEARCH&keywords=${keywords}&apikey=${this.apiKey}`
@@ -181,7 +233,18 @@ class AlphaVantageAPI {
         throw new Error('API call frequency limit reached. Please try again later.');
       }
       
-      return data.bestMatches || [];
+      if (data['Information']) {
+        throw new Error('Daily API limit reached. You have used all 25 free requests for today. Please try again tomorrow or upgrade your plan.');
+      }
+      
+      const results = data.bestMatches || [];
+      
+      // Cache the successful response
+      if (results.length > 0) {
+        await cacheService.set(cacheKey, results, cacheExpiryMs);
+      }
+      
+      return results;
     } catch (error) {
       console.error('Error searching symbols:', error);
       throw error;
@@ -202,19 +265,60 @@ class AlphaVantageAPI {
   }
 
   // Get formatted stocks for each category
-  async getTopGainers(): Promise<Stock[]> {
-    const data = await this.getTopGainersLosers();
+  async getTopGainers(useCache: boolean = true): Promise<Stock[]> {
+    const data = await this.getTopGainersLosers(useCache);
     return data.top_gainers.slice(0, 10).map(stock => this.transformToStock(stock, 'gainer'));
   }
 
-  async getTopLosers(): Promise<Stock[]> {
-    const data = await this.getTopGainersLosers();
+  async getTopLosers(useCache: boolean = true): Promise<Stock[]> {
+    const data = await this.getTopGainersLosers(useCache);
     return data.top_losers.slice(0, 10).map(stock => this.transformToStock(stock, 'loser'));
   }
 
-  async getMostActive(): Promise<Stock[]> {
-    const data = await this.getTopGainersLosers();
+  async getMostActive(useCache: boolean = true): Promise<Stock[]> {
+    const data = await this.getTopGainersLosers(useCache);
     return data.most_actively_traded.slice(0, 10).map(stock => this.transformToStock(stock, 'active'));
+  }
+
+  // Force refresh data (bypass cache)
+  async refreshTopGainers(): Promise<Stock[]> {
+    return this.getTopGainers(false);
+  }
+
+  async refreshTopLosers(): Promise<Stock[]> {
+    return this.getTopLosers(false);
+  }
+
+  async refreshMostActive(): Promise<Stock[]> {
+    return this.getMostActive(false);
+  }
+
+  // Clear cache for specific data types
+  async clearCache(type?: 'all' | 'stocks' | 'company' | 'search'): Promise<void> {
+    switch (type) {
+      case 'stocks':
+        await cacheService.remove('top_gainers_losers');
+        break;
+      case 'company':
+        // This would require knowing all company symbols in cache
+        // For now, we'll clear all
+        await cacheService.clearAll();
+        break;
+      case 'search':
+        // This would require knowing all search terms
+        // For now, we'll clear all
+        await cacheService.clearAll();
+        break;
+      case 'all':
+      default:
+        await cacheService.clearAll();
+        break;
+    }
+  }
+
+  // Get cache info for debugging
+  async getCacheInfo() {
+    return cacheService.getCacheInfo();
   }
 }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { alphaVantageAPI, Stock } from '../../services/AlphaVantageAPI';
+import { mockTopGainers, mockTopLosers, mockMostActive } from '../../services/mockData';
 
 function StockCard({ name, price, change, fullName, onPress }: { name: string; price: string; change: string; fullName: string; onPress: () => void }) {
   const isPositive = change.startsWith('+');
@@ -75,31 +76,48 @@ export default function HomeScreen({ navigation }: any) {
     fetchStockData();
   }, []);
 
-  const fetchStockData = async () => {
+  const fetchStockData = async (forceRefresh: boolean = false) => {
     try {
       setLoading(true);
       setError(null);
       
+      console.log(`Fetching stock data... ${forceRefresh ? '(force refresh)' : '(using cache if available)'}`);
+      
       // Fetch all data in parallel
       const [gainersData, losersData, activeData] = await Promise.all([
-        alphaVantageAPI.getTopGainers(),
-        alphaVantageAPI.getTopLosers(),
-        alphaVantageAPI.getMostActive(),
+        forceRefresh ? alphaVantageAPI.refreshTopGainers() : alphaVantageAPI.getTopGainers(),
+        forceRefresh ? alphaVantageAPI.refreshTopLosers() : alphaVantageAPI.getTopLosers(),
+        forceRefresh ? alphaVantageAPI.refreshMostActive() : alphaVantageAPI.getMostActive(),
       ]);
 
       setTopGainers(gainersData);
       setTopLosers(losersData);
       setMostActive(activeData);
-    } catch (err) {
+      
+      console.log(`✅ Stock data loaded successfully ${forceRefresh ? '(fresh from API)' : '(from cache or API)'}`);
+      
+      // Log cache info for debugging
+      const cacheInfo = await alphaVantageAPI.getCacheInfo();
+      console.log('Cache status:', cacheInfo);
+    } catch (err: any) {
       console.error('Error fetching stock data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch stock data');
+      
+      // If it's a rate limit error, show mock data
+      if (err.message && err.message.includes('Daily API limit reached')) {
+        setTopGainers(mockTopGainers);
+        setTopLosers(mockTopLosers);
+        setMostActive(mockMostActive);
+        setError('API limit reached - showing sample data. Try again tomorrow for live data.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to fetch stock data');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleRefresh = () => {
-    fetchStockData();
+    fetchStockData(true); // Force refresh on pull-to-refresh
   };
 
   if (error) {
