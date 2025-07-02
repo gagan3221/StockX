@@ -1,16 +1,29 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useWatchlist } from '../../components/WatchlistContext';
 
 export default function StockDetailsScreen({ route, navigation }: any) {
   const { stock } = route.params || { 
     stock: { 
+      id: '1',
       name: 'AAPL', 
       price: '$177.04', 
       change: '+$1.24', 
       changePercent: '+0.70%',
       fullName: 'Apple Inc.'
     } 
+  };
+
+  const { addToWatchlist, removeFromWatchlist, isInWatchlist, currentWatchlistId } = useWatchlist();
+  const isBookmarked = isInWatchlist(stock.id);
+
+  const handleBookmarkPress = () => {
+    if (isBookmarked) {
+      removeFromWatchlist(stock.id);
+    } else {
+      addToWatchlist(stock);
+    }
   };
 
   return (
@@ -21,8 +34,12 @@ export default function StockDetailsScreen({ route, navigation }: any) {
           <Icon name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Details Screen</Text>
-        <TouchableOpacity style={styles.bookmarkButton}>
-          <Icon name="bookmark-outline" size={24} color="#fff" />
+        <TouchableOpacity style={styles.bookmarkButton} onPress={handleBookmarkPress}>
+          <Icon 
+            name={isBookmarked ? "bookmark" : "bookmark-outline"} 
+            size={24} 
+            color={isBookmarked ? "#4CAF50" : "#fff"} 
+          />
         </TouchableOpacity>
       </View>
 
@@ -31,7 +48,12 @@ export default function StockDetailsScreen({ route, navigation }: any) {
         <View style={styles.stockInfo}>
           <View style={styles.stockHeader}>
             <View style={styles.logoContainer}>
-              <Text style={styles.logoText}>🍎</Text>
+              <Text style={styles.logoText}>
+                {stock.name === 'AAPL' ? '🍎' : 
+                 stock.name === 'GOOGL' ? '🔍' : 
+                 stock.name === 'TSLA' ? '🚗' : 
+                 stock.name === 'AMZN' ? '📦' : '📈'}
+              </Text>
             </View>
             <View style={styles.stockDetails}>
               <Text style={styles.stockName}>{stock.fullName || 'Apple Inc.'}</Text>
@@ -39,7 +61,9 @@ export default function StockDetailsScreen({ route, navigation }: any) {
             </View>
             <View style={styles.priceContainer}>
               <Text style={styles.price}>{stock.price || '$177.04'}</Text>
-              <Text style={styles.change}>+$1.24 (+0.70%)</Text>
+              <Text style={[styles.change, { color: stock.change?.startsWith('+') ? '#4CAF50' : '#F44336' }]}>
+                {stock.change || '+$1.24 (+0.70%)'}
+              </Text>
             </View>
           </View>
         </View>
@@ -80,9 +104,18 @@ export default function StockDetailsScreen({ route, navigation }: any) {
 
         {/* About Section */}
         <View style={styles.aboutSection}>
-          <Text style={styles.sectionTitle}>About AAPL INC</Text>
+          <Text style={styles.sectionTitle}>About {stock.name} INC</Text>
           <Text style={styles.aboutText}>
-            Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. The company serves consumers, and small and mid-sized businesses; and the education, enterprise, and government markets. It distributes its products through its retail stores, online stores, and direct sales force, as well as through third-party cellular network carriers, wholesalers, retailers, and resellers. The company was formerly known as Apple Computer, Inc. and changed its name to Apple Inc. in January 2007. Apple Inc. was founded in 1976 and is headquartered in Cupertino, California.
+            {stock.name === 'AAPL' ? 
+              'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. The company serves consumers, and small and mid-sized businesses; and the education, enterprise, and government markets.' :
+            stock.name === 'GOOGL' ?
+              'Alphabet Inc. provides online advertising services in the United States, Europe, the Middle East, Africa, the Asia-Pacific, Canada, and Latin America. The company offers performance and brand advertising services.' :
+            stock.name === 'TSLA' ?
+              'Tesla, Inc. designs, develops, manufactures, leases, and sells electric vehicles, and energy generation and storage systems in the United States, China, and internationally.' :
+            stock.name === 'AMZN' ?
+              'Amazon.com, Inc. engages in the retail sale of consumer products and subscriptions in North America and internationally. The company operates through three segments: North America, International, and Amazon Web Services (AWS).' :
+              'This company is a leading player in its respective industry, providing innovative solutions and services to customers worldwide.'
+            }
           </Text>
         </View>
 
@@ -95,7 +128,7 @@ export default function StockDetailsScreen({ route, navigation }: any) {
             </View>
             <View style={styles.metric}>
               <Text style={styles.metricLabel}>Current price</Text>
-              <Text style={styles.metricValue}>$177.04</Text>
+              <Text style={styles.metricValue}>{stock.price || '$177.04'}</Text>
             </View>
             <View style={styles.metric}>
               <Text style={styles.metricLabel}>52 Week High</Text>
@@ -208,7 +241,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   change: {
-    color: '#4CAF50',
     fontSize: 14,
   },
   chartContainer: {
