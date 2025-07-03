@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView, Alert, Modal, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useWatchlist } from '../../components/WatchlistContext';
+import { ThemeContext } from '../theme/ThemeContext';
 
 interface StockCardProps {
   symbol: string;
@@ -13,18 +14,21 @@ interface StockCardProps {
 }
 
 function WatchlistStockCard({ symbol, name, price, changePercent, onPress, onRemove }: StockCardProps) {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const isPositive = changePercent.startsWith('+');
+  let changeColor = isPositive ? '#4CAF50' : '#F44336';
   
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <TouchableOpacity style={[styles.card, { backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5' }]} onPress={onPress}>
       {/* Remove button */}
       <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
-        <Icon name="close-circle" size={20} color="#666" />
+        <Icon name="close" size={18} color={isDark ? '#fff' : '#111'} />
       </TouchableOpacity>
       
       {/* Stock avatar */}
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>
+      <View style={[styles.avatar, { backgroundColor: isDark ? '#2a2a2a' : '#e0e0e0' }]}>
+        <Text style={[styles.avatarText, { color: isDark ? '#fff' : '#111' }]}>
           {symbol === 'AAPL' ? '🍎' : 
            symbol === 'GOOGL' ? '🔍' : 
            symbol === 'TSLA' ? '🚗' : 
@@ -33,9 +37,9 @@ function WatchlistStockCard({ symbol, name, price, changePercent, onPress, onRem
       </View>
       
       {/* Stock info */}
-      <Text style={styles.stockName}>{symbol}</Text>
-      <Text style={styles.stockPrice}>{price}</Text>
-      <Text style={[styles.stockChange, { color: isPositive ? '#4CAF50' : '#F44336' }]}>
+      <Text style={[styles.stockName, { color: isDark ? '#fff' : '#111' }]}>{name}</Text>
+      <Text style={[styles.stockPrice, { color: isDark ? '#fff' : '#111' }]}>{price}</Text>
+      <Text style={[styles.stockChange, { color: changeColor }]}>
         {changePercent}
       </Text>
     </TouchableOpacity>
@@ -53,6 +57,9 @@ export default function WatchlistScreen({ navigation }: any) {
     renameWatchlist,
     setCurrentWatchlist 
   } = useWatchlist();
+
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const [showManageModal, setShowManageModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -129,21 +136,21 @@ export default function WatchlistScreen({ navigation }: any) {
   const currentStocks = currentWatchlist?.stocks || [];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#000' : '#fff' }] }>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#ccc' }] }>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color="#fff" />
+          <Icon name="arrow-back" size={24} color={isDark ? '#fff' : '#111'} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{currentWatchlist?.name || 'Watchlist'}</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#111' }]}>{currentWatchlist?.name || 'Watchlist'}</Text>
         <TouchableOpacity style={styles.menuButton} onPress={() => setShowManageModal(true)}>
-          <Icon name="ellipsis-vertical" size={24} color="#fff" />
+          <Icon name="ellipsis-vertical" size={24} color={isDark ? '#fff' : '#111'} />
         </TouchableOpacity>
       </View>
 
       {/* Watchlist Selector */}
       {watchlists.length > 1 && (
-        <View style={styles.watchlistSelector}>
+        <View style={[styles.watchlistSelector, { borderBottomColor: isDark ? '#333' : '#ccc' }] }>
           <FlatList
             data={watchlists}
             horizontal
@@ -153,17 +160,19 @@ export default function WatchlistScreen({ navigation }: any) {
               <TouchableOpacity
                 style={[
                   styles.watchlistTab,
-                  item.id === currentWatchlistId && styles.activeWatchlistTab
+                  { backgroundColor: isDark ? '#1a1a1a' : '#e0e0e0' },
+                  item.id === currentWatchlistId && { backgroundColor: '#2196F3' }
                 ]}
                 onPress={() => setCurrentWatchlist(item.id)}
               >
                 <Text style={[
                   styles.watchlistTabText,
+                  { color: isDark ? '#aaa' : '#333' },
                   item.id === currentWatchlistId && styles.activeWatchlistTabText
                 ]}>
                   {item.name}
                 </Text>
-                <Text style={styles.watchlistStockCount}>
+                <Text style={[styles.watchlistStockCount, { color: isDark ? '#666' : '#888' }]}>
                   {item.stocks.length} stocks
                 </Text>
               </TouchableOpacity>
@@ -176,14 +185,14 @@ export default function WatchlistScreen({ navigation }: any) {
       <View style={styles.content}>
         {currentStocks.length === 0 ? (
           <View style={styles.emptyState}>
-            <Icon name="star-outline" size={64} color="#666" />
-            <Text style={styles.emptyText}>No stocks in this watchlist</Text>
-            <Text style={styles.emptySubtext}>Add stocks from the home screen to track them here</Text>
+            <Icon name="star-outline" size={64} color={isDark ? '#666' : '#bbb'} />
+            <Text style={[styles.emptyText, { color: isDark ? '#fff' : '#111' }]}>No stocks in this watchlist</Text>
+            <Text style={[styles.emptySubtext, { color: isDark ? '#aaa' : '#888' }]}>Add stocks from the home screen to track them here</Text>
           </View>
         ) : (
           <>
             <View style={styles.statsHeader}>
-              <Text style={styles.stockCount}>{currentStocks.length} Stocks</Text>
+              <Text style={[styles.stockCount, { color: isDark ? '#aaa' : '#333' }]}>{currentStocks.length} Stocks</Text>
             </View>
             <FlatList
               data={currentStocks}
@@ -346,7 +355,6 @@ export default function WatchlistScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   header: {
     flexDirection: 'row',
@@ -355,8 +363,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
-    marginTop: 40,
   },
   backButton: {
     padding: 4,
@@ -373,14 +379,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
   },
   watchlistTab: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 12,
     borderRadius: 20,
-    backgroundColor: '#1a1a1a',
   },
   activeWatchlistTab: {
     backgroundColor: '#2196F3',

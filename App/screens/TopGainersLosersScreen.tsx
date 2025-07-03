@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { alphaVantageAPI, Stock } from '../../services/AlphaVantageAPI';
 import { mockTopGainers, mockTopLosers, mockMostActive } from '../../services/mockData';
+import { ThemeContext } from '../theme/ThemeContext';
 
-function StockListItem({ item, onPress, type }: { item: Stock; onPress: () => void; type: string }) {
+function StockListItem({ item, onPress, type, theme }: { item: Stock; onPress: () => void; type: string; theme: string }) {
+  const isDark = theme === 'dark';
   const isPositive = item.changePercent.startsWith('+');
   let changeColor = '#F44336';
   if (type === 'gainers') {
@@ -13,16 +15,16 @@ function StockListItem({ item, onPress, type }: { item: Stock; onPress: () => vo
     changeColor = isPositive ? '#4CAF50' : '#F44336';
   }
   return (
-    <TouchableOpacity style={styles.listItem} onPress={onPress}>
-      <View style={styles.stockInfo}>
-        <View style={styles.avatar} />
+    <TouchableOpacity style={[styles.listItem, { backgroundColor: isDark ? '#2a2a2a' : '#f5f5f5' }]} onPress={onPress}>
+      <View style={[styles.stockInfo]}>
+        <View style={[styles.avatar, { backgroundColor: isDark ? '#444' : '#e0e0e0' }]} />
         <View style={styles.stockDetails}>
-          <Text style={styles.stockName}>{item.symbol}</Text>
-          <Text style={styles.fullName}>{item.name}</Text>
+          <Text style={[styles.stockName, { color: isDark ? '#fff' : '#111' }]}>{item.symbol}</Text>
+          <Text style={[styles.fullName, { color: isDark ? '#aaa' : '#333' }]}>{item.name}</Text>
         </View>
       </View>
       <View style={styles.priceInfo}>
-        <Text style={styles.price}>{item.price}</Text>
+        <Text style={[styles.price, { color: isDark ? '#fff' : '#111' }]}>{item.price}</Text>
         <Text style={[styles.change, { color: changeColor }]}>
           {item.changePercent}
         </Text>
@@ -32,6 +34,8 @@ function StockListItem({ item, onPress, type }: { item: Stock; onPress: () => vo
 }
 
 export default function TopGainersLosersScreen({ route, navigation }: any) {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const { type, data: initialData } = route.params || { type: 'gainers', data: null };
   
   const [stocks, setStocks] = useState<Stock[]>(initialData || []);
@@ -138,21 +142,21 @@ export default function TopGainersLosersScreen({ route, navigation }: any) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#000' : '#fff' }] }>
+      <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#ccc' }] }>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color="#fff" />
+          <Icon name="arrow-back" size={24} color={isDark ? '#fff' : '#111'} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{getTitle()}</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#111' }]}>{getTitle()}</Text>
         <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>
-          <Icon name="refresh" size={24} color="#fff" />
+          <Icon name="refresh" size={24} color={isDark ? '#fff' : '#111'} />
         </TouchableOpacity>
       </View>
       
       {loading && stocks.length === 0 ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4CAF50" />
-          <Text style={styles.loadingText}>Loading stocks...</Text>
+          <Text style={[styles.loadingText, { color: isDark ? '#aaa' : '#333' }]}>Loading stocks...</Text>
         </View>
       ) : (
         <FlatList
@@ -163,6 +167,7 @@ export default function TopGainersLosersScreen({ route, navigation }: any) {
               item={item} 
               onPress={() => navigation.navigate('StockDetails', { stock: item })}
               type={type}
+              theme={theme}
             />
           )}
           contentContainerStyle={styles.listContainer}

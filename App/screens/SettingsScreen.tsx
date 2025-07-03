@@ -8,9 +8,6 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#000' : '#fff' }]}> 
-      <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]}>Settings</Text>
-      </View>
       <View style={styles.logoContainer}>
         <Image
           source={isDark ? require('../Assets/stockxlogo.png') : require('../Assets/stockxblacklogo.png')}
@@ -48,8 +45,8 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 160,
+    height: 160,
     resizeMode: 'contain',
   },
   row: {

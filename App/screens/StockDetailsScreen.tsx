@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useWatchlist } from '../../components/WatchlistContext';
 import { alphaVantageAPI, CompanyOverview } from '../../services/AlphaVantageAPI';
+import { ThemeContext } from '../theme/ThemeContext';
 
 export default function StockDetailsScreen({ route, navigation }: any) {
   const { stock } = route.params || { 
@@ -22,6 +23,9 @@ export default function StockDetailsScreen({ route, navigation }: any) {
   const [companyData, setCompanyData] = useState<CompanyOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     fetchCompanyData();
@@ -83,28 +87,28 @@ export default function StockDetailsScreen({ route, navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#000' : '#fff' }] }>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#ccc' }] }>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color="#fff" />
+          <Icon name="arrow-back" size={24} color={isDark ? '#fff' : '#111'} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Stock Details</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#111' }]}>Stock Details</Text>
         <TouchableOpacity style={styles.bookmarkButton} onPress={handleBookmarkPress}>
           <Icon 
             name={isBookmarked ? "bookmark" : "bookmark-outline"} 
             size={24} 
-            color={isBookmarked ? "#4CAF50" : "#fff"} 
+            color={isBookmarked ? "#4CAF50" : isDark ? "#fff" : "#111"} 
           />
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Stock Info */}
-        <View style={styles.stockInfo}>
+        <View style={[styles.stockInfo, { backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5' }] }>
           <View style={styles.stockHeader}>
-            <View style={styles.logoContainer}>
-              <Text style={styles.logoText}>
+            <View style={[styles.logoContainer, { backgroundColor: isDark ? '#2a2a2a' : '#e0e0e0' }] }>
+              <Text style={[styles.logoText, { color: isDark ? '#fff' : '#111' }]}>
                 {stock.symbol === 'AAPL' ? '🍎' : 
                  stock.symbol === 'GOOGL' ? '🔍' : 
                  stock.symbol === 'TSLA' ? '🚗' : 
@@ -112,13 +116,13 @@ export default function StockDetailsScreen({ route, navigation }: any) {
               </Text>
             </View>
             <View style={styles.stockDetails}>
-              <Text style={styles.stockName}>
+              <Text style={[styles.stockName, { color: isDark ? '#fff' : '#111' }]}>
                 {loading ? 'Loading...' : companyData?.Name || stock.name || 'Unknown Company'}
               </Text>
-              <Text style={styles.stockSymbol}>{stock.symbol || stock.name}</Text>
+              <Text style={[styles.stockSymbol, { color: isDark ? '#aaa' : '#333' }]}>{stock.symbol || stock.name}</Text>
             </View>
             <View style={styles.priceContainer}>
-              <Text style={styles.price}>{stock.price}</Text>
+              <Text style={[styles.price, { color: isDark ? '#fff' : '#111' }]}>{stock.price}</Text>
               <Text style={[styles.change, { color: stock.changePercent?.startsWith('+') ? '#4CAF50' : '#F44336' }]}>
                 {stock.changePercent || 'N/A'}
               </Text>
@@ -267,7 +271,6 @@ export default function StockDetailsScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   header: {
     flexDirection: 'row',
@@ -276,14 +279,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
-    marginTop: 40
   },
   backButton: {
     padding: 4,
   },
   headerTitle: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -318,20 +318,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   stockName: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   stockSymbol: {
-    color: '#aaa',
     fontSize: 14,
   },
   priceContainer: {
     alignItems: 'flex-end',
   },
   price: {
-    color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 4,
@@ -456,7 +453,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
