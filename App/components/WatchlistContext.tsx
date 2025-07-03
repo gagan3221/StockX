@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Stock } from '../services/AlphaVantageAPI';
+import { Stock } from '../../services/AlphaVantageAPI';
 
 interface Watchlist {
   id: string;

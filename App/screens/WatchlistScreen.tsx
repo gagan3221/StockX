@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView, Alert, Modal, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useWatchlist } from '../../components/WatchlistContext';
+import { useWatchlist } from '../components/WatchlistContext';
 import { ThemeContext } from '../theme/ThemeContext';
 
 interface StockCardProps {

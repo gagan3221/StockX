@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { alphaVantageAPI, SearchResult } from '../../services/AlphaVantageAPI';
-import { useWatchlist } from '../../components/WatchlistContext';
+import { useWatchlist } from '../components/WatchlistContext';
 
 interface SearchResultItemProps {
   item: SearchResult;

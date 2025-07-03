@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useWatchlist } from '../../components/WatchlistContext';
+import { useWatchlist } from '../components/WatchlistContext';
 import { alphaVantageAPI, CompanyOverview } from '../../services/AlphaVantageAPI';
 import { ThemeContext } from '../theme/ThemeContext';
 
