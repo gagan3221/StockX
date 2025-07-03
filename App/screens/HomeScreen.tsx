@@ -4,15 +4,20 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { alphaVantageAPI, Stock } from '../../services/AlphaVantageAPI';
 import { mockTopGainers, mockTopLosers, mockMostActive } from '../../services/mockData';
 
-function StockCard({ name, price, change, fullName, onPress }: { name: string; price: string; change: string; fullName: string; onPress: () => void }) {
+function StockCard({ name, price, change, fullName, onPress, type }: { name: string; price: string; change: string; fullName: string; onPress: () => void; type?: string }) {
   const isPositive = change.startsWith('+');
-  
+  let changeColor = '#F44336';
+  if (type === 'gainers' || type === 'active') {
+    changeColor = '#4CAF50';
+  } else {
+    changeColor = isPositive ? '#4CAF50' : '#F44336';
+  }
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.avatar} />
       <Text style={styles.stockName}>{name}</Text>
       <Text style={styles.stockPrice}>{price}</Text>
-      <Text style={[styles.stockChange, { color: isPositive ? '#4CAF50' : '#F44336' }]}>
+      <Text style={[styles.stockChange, { color: changeColor }]}> 
         {change}
       </Text>
     </TouchableOpacity>
@@ -56,6 +61,7 @@ function Section({ title, onViewAll, data, navigation, loading }: { title: strin
             change={item.changePercent} 
             fullName={item.name}
             onPress={() => navigation.navigate('StockDetails', { stock: item })}
+            type={title === 'Top Gainers' ? 'gainers' : title === 'Most Active' ? 'active' : undefined}
           />
         )}
         columnWrapperStyle={styles.cardRow}

@@ -151,14 +151,14 @@ export default function StockDetailsScreen({ route, navigation }: any) {
         </View>
 
         {/* Action Buttons */}
-        <View style={styles.actionButtons}>
+        {/* <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.buyButton}>
             <Text style={styles.buyButtonText}>Buy</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sellButton}>
             <Text style={styles.sellButtonText}>Sell</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* About Section */}
         {loading ? (
@@ -277,6 +277,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
+    marginTop: 40
   },
   backButton: {
     padding: 4,

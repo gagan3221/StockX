@@ -29,9 +29,9 @@ export default function Navigation() {
             header: () => <HomeHeader />,
           }}
         />
-        <Stack.Screen name="Watchlist" component={WatchlistScreen} />
-        <Stack.Screen name="StockDetails" component={StockDetailsScreen} options={{ title: 'Stock Details' }} />
-        <Stack.Screen name="TopGainersLosers" component={TopGainersLosersScreen} options={{ title: 'Top Gainers/Losers' }} />
+        <Stack.Screen name="Watchlist" component={WatchlistScreen} options={{headerShown: false}} />
+        <Stack.Screen name="StockDetails" component={StockDetailsScreen} options={{headerShown: false}} />
+        <Stack.Screen name="TopGainersLosers" component={TopGainersLosersScreen} options={{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

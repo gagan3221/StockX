@@ -4,9 +4,14 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { alphaVantageAPI, Stock } from '../../services/AlphaVantageAPI';
 import { mockTopGainers, mockTopLosers, mockMostActive } from '../../services/mockData';
 
-function StockListItem({ item, onPress }: { item: Stock; onPress: () => void }) {
+function StockListItem({ item, onPress, type }: { item: Stock; onPress: () => void; type: string }) {
   const isPositive = item.changePercent.startsWith('+');
-  
+  let changeColor = '#F44336';
+  if (type === 'gainers') {
+    changeColor = '#4CAF50';
+  } else {
+    changeColor = isPositive ? '#4CAF50' : '#F44336';
+  }
   return (
     <TouchableOpacity style={styles.listItem} onPress={onPress}>
       <View style={styles.stockInfo}>
@@ -18,7 +23,7 @@ function StockListItem({ item, onPress }: { item: Stock; onPress: () => void }) 
       </View>
       <View style={styles.priceInfo}>
         <Text style={styles.price}>{item.price}</Text>
-        <Text style={[styles.change, { color: isPositive ? '#4CAF50' : '#F44336' }]}>
+        <Text style={[styles.change, { color: changeColor }]}>
           {item.changePercent}
         </Text>
       </View>
@@ -157,6 +162,7 @@ export default function TopGainersLosersScreen({ route, navigation }: any) {
             <StockListItem 
               item={item} 
               onPress={() => navigation.navigate('StockDetails', { stock: item })}
+              type={type}
             />
           )}
           contentContainerStyle={styles.listContainer}
@@ -188,6 +194,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
+    marginTop: 40
   },
   backButton: {
     padding: 4,
