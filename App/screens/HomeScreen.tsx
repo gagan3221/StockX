@@ -10,14 +10,24 @@ function StockCard({ name, price, change, fullName, onPress, type }: { name: str
   const isDark = theme === 'dark';
   const isPositive = change.startsWith('+');
   let changeColor = '#F44336';
-  if (type === 'gainers' || type === 'active') {
+  let avatarIcon = null;
+  if (type === 'gainers') {
     changeColor = '#4CAF50';
+    avatarIcon = <Icon name="arrow-up" size={20} color={changeColor} />;
+  } else if (type === 'losers') {
+    changeColor = isPositive ? '#4CAF50' : '#F44336';
+    avatarIcon = <Icon name="arrow-down" size={20} color={changeColor} />;
+  } else if (type === 'active') {
+    changeColor = '#4CAF50';
+    avatarIcon = <Icon name="arrow-up" size={20} color={changeColor} />;
   } else {
     changeColor = isPositive ? '#4CAF50' : '#F44336';
   }
   return (
     <TouchableOpacity style={[styles.card, { backgroundColor: isDark ? '#2a2a2a' : '#f5f5f5' }]} onPress={onPress}>
-      <View style={[styles.avatar, { backgroundColor: isDark ? '#444' : '#e0e0e0' }]} />
+      <View style={[styles.avatar, { backgroundColor: isDark ? '#444' : '#e0e0e0', justifyContent: 'center', alignItems: 'center' }] }>
+        {avatarIcon}
+      </View>
       <Text style={[styles.stockName, { color: isDark ? '#fff' : '#111' }]}>{name}</Text>
       <Text style={[styles.stockPrice, { color: isDark ? '#fff' : '#111' }]}>{price}</Text>
       <Text style={[styles.stockChange, { color: changeColor }]}>
@@ -66,7 +76,7 @@ function Section({ title, onViewAll, data, navigation, loading }: { title: strin
             change={item.changePercent} 
             fullName={item.name}
             onPress={() => navigation.navigate('StockDetails', { stock: item })}
-            type={title === 'Top Gainers' ? 'gainers' : title === 'Most Active' ? 'active' : undefined}
+            type={title === 'Top Gainers' ? 'gainers' : title === 'Top Losers' ? 'losers' : title === 'Most Active' ? 'active' : undefined}
           />
         )}
         columnWrapperStyle={styles.cardRow}

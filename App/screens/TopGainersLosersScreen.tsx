@@ -9,15 +9,22 @@ function StockListItem({ item, onPress, type, theme }: { item: Stock; onPress: (
   const isDark = theme === 'dark';
   const isPositive = item.changePercent.startsWith('+');
   let changeColor = '#F44336';
+  let avatarIcon = null;
   if (type === 'gainers') {
     changeColor = '#4CAF50';
+    avatarIcon = <Icon name="arrow-up" size={20} color={changeColor} />;
+  } else if (type === 'losers') {
+    changeColor = isPositive ? '#4CAF50' : '#F44336';
+    avatarIcon = <Icon name="arrow-down" size={20} color={changeColor} />;
   } else {
     changeColor = isPositive ? '#4CAF50' : '#F44336';
   }
   return (
     <TouchableOpacity style={[styles.listItem, { backgroundColor: isDark ? '#2a2a2a' : '#f5f5f5' }]} onPress={onPress}>
-      <View style={[styles.stockInfo]}>
-        <View style={[styles.avatar, { backgroundColor: isDark ? '#444' : '#e0e0e0' }]} />
+      <View style={styles.stockInfo}>
+        <View style={[styles.avatar, { backgroundColor: isDark ? '#444' : '#e0e0e0', justifyContent: 'center', alignItems: 'center' }] }>
+          {avatarIcon}
+        </View>
         <View style={styles.stockDetails}>
           <Text style={[styles.stockName, { color: isDark ? '#fff' : '#111' }]}>{item.symbol}</Text>
           <Text style={[styles.fullName, { color: isDark ? '#aaa' : '#333' }]}>{item.name}</Text>
