@@ -4,6 +4,65 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useWatchlist } from '../components/WatchlistContext';
 import { alphaVantageAPI, CompanyOverview } from '../../services/AlphaVantageAPI';
 import { ThemeContext } from '../theme/ThemeContext';
+import Svg, { Path, LinearGradient, Stop, Defs } from 'react-native-svg';
+
+const MOCK_CHARTS = {
+  '1D': [10, 20, 15, 25, 30, 28, 35],
+  '1W': [15, 18, 22, 20, 25, 30, 32],
+  '1M': [20, 22, 18, 25, 28, 30, 35],
+  '3M': [25, 28, 30, 32, 35, 38, 40],
+  '1Y': [30, 32, 35, 38, 40, 42, 45],
+  '5Y': [20, 25, 30, 35, 40, 45, 50],
+};
+
+function getLinePath(points: { x: number; y: number }[]) {
+  if (points.length === 0) return '';
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const p = points[i];
+    d += ` L ${p.x} ${p.y}`;
+  }
+  return d;
+}
+
+function getAreaPath(points: { x: number; y: number }[], height: number) {
+  if (points.length === 0) return '';
+  let d = `M ${points[0].x} ${height} L ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const p = points[i];
+    d += ` L ${p.x} ${p.y}`;
+  }
+  d += ` L ${points[points.length - 1].x} ${height} Z`;
+  return d;
+}
+
+function MockChart({ data, color, isDark }: { data: number[]; color: string; isDark: boolean }) {
+  // Realistic line chart using SVG
+  const width = '100%';
+  const height = 80;
+  const viewBoxWidth = 300; // for scaling points
+  const viewBoxHeight = 80;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const points = data.map((v, i) => ({
+    x: (i / (data.length - 1)) * (viewBoxWidth - 10) + 5,
+    y: viewBoxHeight - 10 - ((v - min) / (max - min || 1)) * (viewBoxHeight - 20),
+  }));
+  const linePath = getLinePath(points);
+  const areaPath = getAreaPath(points, viewBoxHeight - 10);
+  return (
+    <Svg width={width} height={height} viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}>
+      <Defs>
+        <LinearGradient id="chartGradient" x1="0" y1="0" x2="0" y2={viewBoxHeight}>
+          <Stop offset="0%" stopColor={color} stopOpacity="0.25" />
+          <Stop offset="100%" stopColor={isDark ? '#000' : '#fff'} stopOpacity="0" />
+        </LinearGradient>
+      </Defs>
+      <Path d={areaPath} fill="url(#chartGradient)" />
+      <Path d={linePath} stroke={color} strokeWidth={2.5} fill="none" />
+    </Svg>
+  );
+}
 
 export default function StockDetailsScreen({ route, navigation }: any) {
   const { stock } = route.params || { 
@@ -23,6 +82,7 @@ export default function StockDetailsScreen({ route, navigation }: any) {
   const [companyData, setCompanyData] = useState<CompanyOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<'1D' | '1W' | '1M' | '3M' | '1Y' | '5Y'>('1D');
 
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -130,23 +190,21 @@ export default function StockDetailsScreen({ route, navigation }: any) {
           </View>
         </View>
 
-        {/* Chart Placeholder */}
+        {/* Chart Section */}
         <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>1D</Text>
+          <Text style={styles.chartTitle}>{selectedPeriod}</Text>
           <View style={styles.chart}>
-            {/* Simple chart placeholder */}
-            <View style={styles.chartLine} />
-            <Text style={styles.chartPlaceholder}>Chart visualization would go here</Text>
+            <MockChart data={MOCK_CHARTS[selectedPeriod]} color={isDark ? '#4CAF50' : '#2196F3'} isDark={isDark} />
           </View>
-          
           {/* Time Period Buttons */}
           <View style={styles.timePeriods}>
-            {['1D', '1W', '1M', '3M', '1Y', '5Y'].map((period, index) => (
+            {['1D', '1W', '1M', '3M', '1Y', '5Y'].map((period) => (
               <TouchableOpacity 
                 key={period} 
-                style={[styles.periodButton, index === 0 && styles.activePeriod]}
+                style={[styles.periodButton, selectedPeriod === period && styles.activePeriod]}
+                onPress={() => setSelectedPeriod(period as '1D' | '1W' | '1M' | '3M' | '1Y' | '5Y')}
               >
-                <Text style={[styles.periodText, index === 0 && styles.activePeriodText]}>
+                <Text style={[styles.periodText, selectedPeriod === period && styles.activePeriodText]}>
                   {period}
                 </Text>
               </TouchableOpacity>
