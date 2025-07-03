@@ -4,8 +4,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { alphaVantageAPI, Stock } from '../../services/AlphaVantageAPI';
 import { mockTopGainers, mockTopLosers, mockMostActive } from '../../services/mockData';
 import { ThemeContext } from '../theme/ThemeContext';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
 
 function StockCard({ name, price, change, fullName, onPress, type }: { name: string; price: string; change: string; fullName: string; onPress: () => void; type?: string }) {
   const { theme } = useContext(ThemeContext);
@@ -42,12 +40,6 @@ function StockCard({ name, price, change, fullName, onPress, type }: { name: str
 function Section({ title, onViewAll, data, navigation, loading }: { title: string; onViewAll: () => void; data: Stock[]; navigation: any; loading: boolean }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const query = useSelector((state: RootState) => state.search.query);
-  const filteredData = data.filter(
-    (item) =>
-      item.symbol.toLowerCase().includes(query.toLowerCase()) ||
-      item.name.toLowerCase().includes(query.toLowerCase())
-  );
   if (loading) {
     return (
       <View style={styles.section}>
@@ -74,7 +66,7 @@ function Section({ title, onViewAll, data, navigation, loading }: { title: strin
         </TouchableOpacity>
       </View>
       <FlatList
-        data={filteredData.slice(0, 4)} // Show only first 4 items on home screen
+        data={data.slice(0, 4)} // Show only first 4 items on home screen
         numColumns={2}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (

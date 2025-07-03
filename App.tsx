@@ -12,24 +12,20 @@ import { View, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { WatchlistProvider } from '../StockX/App/components/WatchlistContext';
 import { ThemeProvider } from './App/theme/ThemeContext';
-import { Provider } from 'react-redux';
-import store from './App/store';
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <ThemeProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <SafeAreaProvider>
-            <WatchlistProvider>
-              <View style={styles.container}>
-                <Navigation />
-              </View>
-            </WatchlistProvider>
-          </SafeAreaProvider>
-        </GestureHandlerRootView>
-      </ThemeProvider>
-    </Provider>
+    <ThemeProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <WatchlistProvider>
+            <View style={styles.container}>
+              <Navigation />
+            </View>
+          </WatchlistProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ThemeProvider>
   );
 }
 

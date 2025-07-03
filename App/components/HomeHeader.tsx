@@ -2,16 +2,10 @@ import React, { useContext } from 'react';
 import { View, TextInput, Image, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ThemeContext } from '../theme/ThemeContext';
-import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import { setQuery } from '../slices/searchSlice';
-import { RootState } from '../store';
 
 export default function HomeHeader() {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const dispatch = useDispatch();
-  const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector;
-  const query = useSelector((state: RootState) => state.search.query);
   return (
     <View style={[styles.headerContainer, { backgroundColor: isDark ? '#000' : '#fff' }] }>
       <Image source={isDark ? require('../Assets/stockxlogo.png') : require('../Assets/stockxblacklogo.png')} style={styles.logo} />
@@ -21,8 +15,6 @@ export default function HomeHeader() {
           placeholder="Search stocks..."
           placeholderTextColor="#888"
           style={styles.searchInput}
-          value={query}
-          onChangeText={text => dispatch(setQuery(text))}
         />
       </View>
     </View>
