@@ -5,6 +5,7 @@ import { useWatchlist } from '../components/WatchlistContext';
 import { alphaVantageAPI, CompanyOverview } from '../../services/AlphaVantageAPI';
 import { ThemeContext } from '../theme/ThemeContext';
 import Svg, { Path, LinearGradient, Stop, Defs } from 'react-native-svg';
+import { mockTopGainers } from '../../services/mockData';
 
 const MOCK_CHARTS = {
   '1D': [10, 20, 15, 25, 30, 28, 35],
@@ -83,6 +84,7 @@ export default function StockDetailsScreen({ route, navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<'1D' | '1W' | '1M' | '3M' | '1Y' | '5Y'>('1D');
+  const [sampleMode, setSampleMode] = useState(false);
 
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -95,11 +97,26 @@ export default function StockDetailsScreen({ route, navigation }: any) {
     try {
       setLoading(true);
       setError(null);
+      setSampleMode(false);
       const data = await alphaVantageAPI.getCompanyOverview(stock.symbol || stock.name);
       setCompanyData(data);
     } catch (err) {
       console.error('Error fetching company data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch company data');
+      if (err instanceof Error && err.message && err.message.toLowerCase().includes('daily api limit')) {
+        setError('You have reached the daily limit for stock data. Showing sample data.');
+      } else {
+        setError('Unable to load stock details at the moment. Showing sample data.');
+      }
+      // Use sample data
+      setCompanyData({
+        Name: stock.name || 'Sample Company',
+        Description: 'This is sample company data shown because live data is unavailable.',
+        Sector: 'Technology',
+        Industry: 'Software',
+        Country: 'USA',
+        ...stock,
+      });
+      setSampleMode(true);
     } finally {
       setLoading(false);
     }
@@ -228,9 +245,24 @@ export default function StockDetailsScreen({ route, navigation }: any) {
             <ActivityIndicator size="large" color="#4CAF50" />
             <Text style={styles.loadingText}>Loading company information...</Text>
           </View>
+        ) : error && sampleMode ? (
+          <View style={styles.errorContainer}>
+            <Icon name="warning-outline" size={32} color="#F44336" style={{ marginBottom: 8 }} />
+            <Text style={styles.errorText}>{error}</Text>
+            {/* Show sample data below */}
+            <View style={styles.aboutSection}>
+              <Text style={styles.sectionTitle}>About {companyData?.Name}</Text>
+              <Text style={styles.aboutText}>{companyData?.Description}</Text>
+              <View style={styles.companyInfo}>
+                <Text style={styles.infoLabel}>Sector: <Text style={styles.infoValue}>{companyData?.Sector}</Text></Text>
+                <Text style={styles.infoLabel}>Industry: <Text style={styles.infoValue}>{companyData?.Industry}</Text></Text>
+                <Text style={styles.infoLabel}>Country: <Text style={styles.infoValue}>{companyData?.Country}</Text></Text>
+              </View>
+            </View>
+          </View>
         ) : error ? (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>Unable to load company information</Text>
+            <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={fetchCompanyData}>
               <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
