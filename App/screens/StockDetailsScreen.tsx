@@ -210,8 +210,11 @@ export default function StockDetailsScreen({ route, navigation }: any) {
         {/* Chart Section */}
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>{selectedPeriod}</Text>
-          <View style={styles.chart}>
-            <MockChart data={MOCK_CHARTS[selectedPeriod]} color={isDark ? '#4CAF50' : '#2196F3'} isDark={isDark} />
+          <View style={[
+            styles.chart,
+            { borderColor: isDark ? '#333' : '#ccc', borderWidth: 2 }
+          ]}>
+            <MockChart data={MOCK_CHARTS[selectedPeriod]} color={isDark ? '#4CAF50' : '#fff'} isDark={isDark} />
           </View>
           {/* Time Period Buttons */}
           <View style={styles.timePeriods}>
