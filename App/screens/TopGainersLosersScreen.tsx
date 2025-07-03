@@ -143,7 +143,7 @@ export default function TopGainersLosersScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#000' : '#fff' }] }>
-      <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#ccc' }] }>
+      <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#ccc', backgroundColor: isDark ? '#000' : '#fff' }] }>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Icon name="arrow-back" size={24} color={isDark ? '#fff' : '#111'} />
         </TouchableOpacity>

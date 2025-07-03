@@ -7,9 +7,9 @@ export default function HomeHeader() {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   return (
-    <View style={styles.headerContainer}>
+    <View style={[styles.headerContainer, { backgroundColor: isDark ? '#000' : '#fff' }] }>
       <Image source={isDark ? require('../Assets/stockxlogo.png') : require('../Assets/stockxblacklogo.png')} style={styles.logo} />
-      <View style={styles.searchBar}>
+      <View style={[styles.searchBar, { backgroundColor: isDark ? '#181818' : '#e0e0e0' }] }>
         <Icon name="search" size={20} color="#888" style={{ marginLeft: 8 }} />
         <TextInput
           placeholder="Search stocks..."

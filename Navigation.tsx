@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'react-native';
@@ -8,18 +8,21 @@ import StockDetailsScreen from './App/screens/StockDetailsScreen';
 import TopGainersLosersScreen from './App/screens/TopGainersLosersScreen';
 import HomeHeader from './App/components/HomeHeader';
 import SettingsScreen from './App/screens/SettingsScreen';
+import { ThemeContext } from './App/theme/ThemeContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function Navigation() {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   return (
     <NavigationContainer>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={isDark ? '#000' : '#fff'} />
       <Stack.Navigator
         initialRouteName="Home"
         screenOptions={{
-          headerStyle: { backgroundColor: '#000' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: isDark ? '#000' : '#fff' },
+          headerTintColor: isDark ? '#fff' : '#111',
           headerTitleAlign: 'center',
         }}
       >

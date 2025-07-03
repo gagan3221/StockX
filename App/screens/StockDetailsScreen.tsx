@@ -89,7 +89,7 @@ export default function StockDetailsScreen({ route, navigation }: any) {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#000' : '#fff' }] }>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#ccc' }] }>
+      <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#ccc', backgroundColor: isDark ? '#000' : '#fff' }] }>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Icon name="arrow-back" size={24} color={isDark ? '#fff' : '#111'} />
         </TouchableOpacity>
@@ -279,6 +279,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
+    marginTop: 40,
   },
   backButton: {
     padding: 4,

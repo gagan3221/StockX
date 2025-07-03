@@ -1,7 +1,7 @@
 // Alpha Vantage API Configuration
 // Get your free API key from: https://www.alphavantage.co/support/#api-key
 
-export const ALPHA_VANTAGE_API_KEY = 'R81V6HFS5XWIFVIJ';
+export const ALPHA_VANTAGE_API_KEY = 'GTR1SMBWDRI5CD6Q';
 
 // Instructions:
 // 1. Sign up for a free account at https://www.alphavantage.co/support/#api-key
