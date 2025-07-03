@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, TextInput, Image, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { ThemeContext } from '../theme/ThemeContext';
 
 export default function HomeHeader() {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   return (
     <View style={styles.headerContainer}>
-      <Image source={require('../Assets/stockxlogo.png')} style={styles.logo} />
+      <Image source={isDark ? require('../Assets/stockxlogo.png') : require('../Assets/stockxblacklogo.png')} style={styles.logo} />
       <View style={styles.searchBar}>
         <Icon name="search" size={20} color="#888" style={{ marginLeft: 8 }} />
         <TextInput

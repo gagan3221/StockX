@@ -11,18 +11,21 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { WatchlistProvider } from './components/WatchlistContext';
+import { ThemeProvider } from './App/theme/ThemeContext';
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <WatchlistProvider>
-          <View style={styles.container}>
-            <Navigation />
-          </View>
-        </WatchlistProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ThemeProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <WatchlistProvider>
+            <View style={styles.container}>
+              <Navigation />
+            </View>
+          </WatchlistProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ThemeProvider>
   );
 }
 

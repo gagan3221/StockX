@@ -143,10 +143,6 @@ export default function HomeScreen({ navigation }: any) {
             <Icon name="home" size={24} color="#fff" />
             <Text style={styles.navText}>Home</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Search')}>
-            <Icon name="search" size={24} color="#aaa" />
-            <Text style={[styles.navText, { color: '#aaa' }]}>Search</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Watchlist')}>
             <Icon name="star-outline" size={24} color="#aaa" />
             <Text style={[styles.navText, { color: '#aaa' }]}>Watchlist</Text>
@@ -199,13 +195,13 @@ export default function HomeScreen({ navigation }: any) {
           <Icon name="home" size={24} color="#fff" />
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Search')}>
-          <Icon name="search" size={24} color="#aaa" />
-          <Text style={[styles.navText, { color: '#aaa' }]}>Search</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Watchlist')}>
           <Icon name="star-outline" size={24} color="#aaa" />
           <Text style={[styles.navText, { color: '#aaa' }]}>Watchlist</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Settings')}>
+          <Icon name="settings-outline" size={24} color="#aaa" />
+          <Text style={[styles.navText, { color: '#aaa' }]}>Settings</Text>
         </TouchableOpacity>
       </View>
     </View>

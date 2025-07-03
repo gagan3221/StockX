@@ -7,6 +7,7 @@ import WatchlistScreen from './App/screens/WatchlistScreen';
 import StockDetailsScreen from './App/screens/StockDetailsScreen';
 import TopGainersLosersScreen from './App/screens/TopGainersLosersScreen';
 import HomeHeader from './App/components/HomeHeader';
+import SettingsScreen from './App/screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,7 @@ export default function Navigation() {
         <Stack.Screen name="Watchlist" component={WatchlistScreen} options={{headerShown: false}} />
         <Stack.Screen name="StockDetails" component={StockDetailsScreen} options={{headerShown: false}} />
         <Stack.Screen name="TopGainersLosers" component={TopGainersLosersScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
